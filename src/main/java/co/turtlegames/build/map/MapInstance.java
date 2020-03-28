@@ -16,7 +16,7 @@ public class MapInstance {
 
     // Measured in chunks
     private int _minX = -2;
-    private int _minZ = 2;
+    private int _minZ = -2;
 
     private int _sizeX = 4;
     private int _sizeZ = 4;
@@ -53,11 +53,11 @@ public class MapInstance {
         if (_world == null)
             return new Chunk[0];
 
-        Chunk[] chunkData = new Chunk[_minX * _minZ];
+        Chunk[] chunkData = new Chunk[_sizeX * _sizeZ];
 
         int i = 0;
-        for (int chunkX = _minX; chunkX <= _minX + _sizeX; chunkX++) {
-            for (int chunkZ = _minZ; chunkZ <= _minZ + _sizeZ; chunkZ++) {
+        for (int chunkX = _minX; chunkX < _minX + _sizeX; chunkX++) {
+            for (int chunkZ = _minZ; chunkZ < _minZ + _sizeZ; chunkZ++) {
 
                 chunkData[i] = _world.getChunkAt(chunkX, chunkZ);
                 i++;

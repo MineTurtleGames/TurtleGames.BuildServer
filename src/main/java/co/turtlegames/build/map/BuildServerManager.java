@@ -4,6 +4,8 @@ import co.turtlegames.build.map.command.MapCommand;
 import co.turtlegames.build.map.listener.BuildServerJoinListener;
 import co.turtlegames.core.TurtleModule;
 import co.turtlegames.core.world.gen.VoidGenerator;
+import co.turtlegames.core.world.tworld.TurtleWorldFormat;
+import co.turtlegames.core.world.tworld.loader.TurtleWorldLoader;
 import co.turtlegames.core.world.virtual.VirtualWorldManager;
 import org.bukkit.*;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -48,6 +50,20 @@ public class BuildServerManager extends TurtleModule {
         generatedWorld.setGameRuleValue("doDaylightCycle", "false");
 
         _mapInstances.put(generatedWorld, mapInstance);
+        return mapInstance;
+
+    }
+
+    public MapInstance loadMap(TurtleWorldFormat worldFormat) {
+
+        VirtualWorldManager virtualWorldManager = this.getModule(VirtualWorldManager.class);
+
+        World world = virtualWorldManager.createVirtualWorld("djwai", new TurtleWorldLoader(worldFormat));
+        MapInstance mapInstance = new MapInstance("djwai", world);
+
+        world.setSpawnFlags(false, false);
+
+        _mapInstances.put(world, mapInstance);
         return mapInstance;
 
     }

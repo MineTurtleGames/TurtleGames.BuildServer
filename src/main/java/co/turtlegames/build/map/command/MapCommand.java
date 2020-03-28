@@ -10,6 +10,7 @@ import co.turtlegames.core.profile.PlayerProfile;
 import co.turtlegames.core.profile.Rank;
 import co.turtlegames.core.world.tworld.TurtleWorldChunk;
 import co.turtlegames.core.world.tworld.TurtleWorldFormat;
+import co.turtlegames.core.world.tworld.io.TurtleInputStream;
 import co.turtlegames.core.world.tworld.io.TurtleOutputStream;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -19,6 +20,7 @@ import org.bukkit.entity.Player;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 public class MapCommand extends CommandBase<BuildServerManager> {
 
@@ -32,8 +34,6 @@ public class MapCommand extends CommandBase<BuildServerManager> {
         BuildServerManager buildManager = this.getModule();
         Player ply = profile.getOwner();
 
-        MapInstance mapInstance = buildManager.getMapInstance(ply.getWorld());
-
         if (args.length == 0) {
 
             ply.sendMessage(Chat.main("Error", "Invalid arguments! Refer to /map <subcommand>"));
@@ -44,6 +44,7 @@ public class MapCommand extends CommandBase<BuildServerManager> {
         }
 
         String subCommand = args[0];
+        MapInstance mapInstance = buildManager.getMapInstance(ply.getWorld());
 
         if(subCommand.equalsIgnoreCase("create")) {
 
@@ -116,7 +117,7 @@ public class MapCommand extends CommandBase<BuildServerManager> {
             menu.open();
         }
 
-        if(subCommand.equals("save")) {
+        if(subCommand.equalsIgnoreCase("save")) {
 
             if(mapInstance == null) {
 
@@ -148,7 +149,48 @@ public class MapCommand extends CommandBase<BuildServerManager> {
 
             }
 
-            fileManager.saveStream(mapInstance.getName(), new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
+            fileManager.saveStream(mapInstance.getId(), new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
+            ply.sendMessage(Chat.main("Build Server", "Written map to datastore under id " + Chat.elem(mapInstance.getId())));
+
+        }
+
+        if(subCommand.equalsIgnoreCase("load")) {
+
+            if(args.length != 2) {
+
+                ply.sendMessage(Chat.main("Error", "Invalid arguments! Refer to: /map load <name>"));
+                return;
+
+            }
+
+            FileManager fileManager = this.getModule().getModule(FileManager.class);
+            InputStream stream = fileManager.getStream(args[1]);
+
+            if(stream == null) {
+
+                ply.sendMessage(Chat.main("Error", "No map found in datastore under name " + Chat.elem(args[1])));
+                return;
+
+            }
+
+            TurtleWorldFormat worldFormat;
+            try {
+
+                TurtleInputStream turtleInStream = new TurtleInputStream(stream);
+                worldFormat = TurtleWorldFormat.loadFromStream(turtleInStream);
+
+            } catch(IOException ex) {
+
+                ex.printStackTrace();
+                ply.sendMessage(Chat.main("Error", "Failed to load map due to a read error. Likely due to the requested file not being a map"));
+                return;
+
+            }
+
+            MapInstance newMapInstance = buildManager.loadMap(worldFormat);
+            ply.teleport(new Location(newMapInstance.getWorld(), 0, 100, 0));
+
+            ply.sendMessage(Chat.main("Build Server", "Loaded your map!"));
 
         }
 
