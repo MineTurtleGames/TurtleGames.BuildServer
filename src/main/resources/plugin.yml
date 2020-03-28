@@ -1,0 +1,4 @@
+name: "tBuild"
+main: co.turtlegames.build.BuildPlugin
+version: "1.0"
+depend: [ "tCore" ]

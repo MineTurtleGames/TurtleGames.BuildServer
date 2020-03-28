@@ -20,6 +20,7 @@ public class BuildServerJoinListener implements Listener {
         ply.sendMessage("");
         ply.sendMessage("     " + ChatColor.GREEN + "To create a map, use " + Chat.elem("/map create <name>"));
         ply.sendMessage("     " + ChatColor.GREEN + "To load a map, use " + Chat.elem("/map load <name>"));
+        ply.sendMessage("");
 
     }
 
