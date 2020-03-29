@@ -3,6 +3,7 @@ package co.turtlegames.build.map;
 import co.turtlegames.build.map.command.MapCommand;
 import co.turtlegames.build.map.listener.BuildServerJoinListener;
 import co.turtlegames.core.TurtleModule;
+import co.turtlegames.core.file.minio.FileClusterManager;
 import co.turtlegames.core.world.gen.VoidGenerator;
 import co.turtlegames.core.world.tworld.TurtleWorldFormat;
 import co.turtlegames.core.world.tworld.loader.TurtleWorldLoader;
@@ -10,6 +11,7 @@ import co.turtlegames.core.world.virtual.VirtualWorldManager;
 import org.bukkit.*;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,6 +30,9 @@ public class BuildServerManager extends TurtleModule {
 
         this.registerListener(new BuildServerJoinListener());
         this.registerCommand(new MapCommand(this));
+
+        FileClusterManager fileClusterManager = this.getModule(FileClusterManager.class);
+        fileClusterManager.validateBucket("staging");
 
     }
 
@@ -58,8 +63,18 @@ public class BuildServerManager extends TurtleModule {
 
         VirtualWorldManager virtualWorldManager = this.getModule(VirtualWorldManager.class);
 
-        World world = virtualWorldManager.createVirtualWorld("djwai", new TurtleWorldLoader(worldFormat));
-        MapInstance mapInstance = new MapInstance("djwai", world);
+        MapInstance mapInstance;
+        try {
+
+            mapInstance = new MapInstance(worldFormat);
+
+        } catch(IOException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+
+        World world = virtualWorldManager.createVirtualWorld(mapInstance.getId(), new TurtleWorldLoader(worldFormat));
+        mapInstance.withWorld(world);
 
         world.setSpawnFlags(false, false);
 

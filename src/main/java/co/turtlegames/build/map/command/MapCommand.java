@@ -5,10 +5,9 @@ import co.turtlegames.build.map.MapInstance;
 import co.turtlegames.build.map.menu.MapManageMenu;
 import co.turtlegames.core.command.CommandBase;
 import co.turtlegames.core.common.Chat;
-import co.turtlegames.core.file.FileManager;
+import co.turtlegames.core.file.minio.FileClusterManager;
 import co.turtlegames.core.profile.PlayerProfile;
 import co.turtlegames.core.profile.Rank;
-import co.turtlegames.core.world.tworld.TurtleWorldChunk;
 import co.turtlegames.core.world.tworld.TurtleWorldFormat;
 import co.turtlegames.core.world.tworld.io.TurtleInputStream;
 import co.turtlegames.core.world.tworld.io.TurtleOutputStream;
@@ -17,10 +16,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
 public class MapCommand extends CommandBase<BuildServerManager> {
 
@@ -126,13 +122,17 @@ public class MapCommand extends CommandBase<BuildServerManager> {
 
             }
 
-            FileManager fileManager = this.getModule().getModule(FileManager.class);
+            FileClusterManager fileClusterManager = this.getModule().getModule(FileClusterManager.class);
 
             Chunk[] chunks = mapInstance.grabAllChunks();
 
+            ply.sendMessage(Chat.main("Build Server", "Beginning to parse world - please wait"));
+
             ByteArrayOutputStream byteArrayOutputStream;
             try {
+
                 TurtleWorldFormat tWorld = TurtleWorldFormat.loadFromChunks(chunks);
+                tWorld.setMetadata(mapInstance.compileMetadata());
 
                 byteArrayOutputStream = new ByteArrayOutputStream();
                 TurtleOutputStream turtleOutStream = new TurtleOutputStream(byteArrayOutputStream);
@@ -140,7 +140,7 @@ public class MapCommand extends CommandBase<BuildServerManager> {
                 tWorld.write(turtleOutStream);
                 byteArrayOutputStream.close();
 
-            } catch(IOException ex) {
+            } catch(Exception ex) {
 
                 ex.printStackTrace();
 
@@ -149,7 +149,15 @@ public class MapCommand extends CommandBase<BuildServerManager> {
 
             }
 
-            fileManager.saveStream(mapInstance.getId(), new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
+            ply.sendMessage(Chat.main("Build Server", "World parsed, attempting to push to datastore"));
+
+            try {
+                fileClusterManager.putByteStream("staging", mapInstance.getId(), new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
+            } catch (IOException ex) {
+               ply.sendMessage(Chat.main("Build Server", "An error occured while writing to datastore"));
+               ex.printStackTrace();
+            }
+
             ply.sendMessage(Chat.main("Build Server", "Written map to datastore under id " + Chat.elem(mapInstance.getId())));
 
         }
@@ -163,8 +171,8 @@ public class MapCommand extends CommandBase<BuildServerManager> {
 
             }
 
-            FileManager fileManager = this.getModule().getModule(FileManager.class);
-            InputStream stream = fileManager.getStream(args[1]);
+            FileClusterManager fileClusterManager = this.getModule().getModule(FileClusterManager.class);
+            InputStream stream = fileClusterManager.grabFileStream("staging", args[1]);
 
             if(stream == null) {
 
@@ -172,6 +180,8 @@ public class MapCommand extends CommandBase<BuildServerManager> {
                 return;
 
             }
+
+            ply.sendMessage(Chat.main("Build Server", "Pulled map under id " + Chat.elem(args[1]) + " from datastore"));
 
             TurtleWorldFormat worldFormat;
             try {
