@@ -1,6 +1,7 @@
 package co.turtlegames.build.map;
 
 import co.turtlegames.build.map.command.MapCommand;
+import co.turtlegames.build.map.listener.BuildMapListener;
 import co.turtlegames.build.map.listener.BuildServerJoinListener;
 import co.turtlegames.core.TurtleModule;
 import co.turtlegames.core.file.minio.FileClusterManager;
@@ -29,6 +30,8 @@ public class BuildServerManager extends TurtleModule {
         _mapInstances = new HashMap<>();
 
         this.registerListener(new BuildServerJoinListener());
+        this.registerListener(new BuildMapListener(this));
+
         this.registerCommand(new MapCommand(this));
 
         FileClusterManager fileClusterManager = this.getModule(FileClusterManager.class);
@@ -80,6 +83,17 @@ public class BuildServerManager extends TurtleModule {
 
         _mapInstances.put(world, mapInstance);
         return mapInstance;
+
+    }
+
+    public void closeMap(MapInstance mapInstance) {
+
+        VirtualWorldManager virtualWorldManager = this.getModule(VirtualWorldManager.class);
+        World world = mapInstance.getWorld();
+
+        virtualWorldManager.unloadVirtualWorld(world);
+
+        _mapInstances.remove(world);
 
     }
 

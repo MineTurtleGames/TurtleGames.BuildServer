@@ -8,6 +8,7 @@ import org.bukkit.World;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -20,7 +21,6 @@ public class MapInstance {
     private String _author = "TurtleGames";
 
     private World _world;
-
 
     // Measured in chunks
     private int _minX = -2;
@@ -37,6 +37,12 @@ public class MapInstance {
     }
 
     public MapInstance(TurtleWorldFormat worldFormat) throws IOException {
+
+        _minX = worldFormat.getMinX();
+        _minZ = worldFormat.getMinZ();
+
+        _sizeX = worldFormat.getXWidth();
+        _sizeZ = worldFormat.getZWidth();
 
         this.parseMetadata(worldFormat.getMetadata());
 
@@ -60,6 +66,18 @@ public class MapInstance {
 
     public String getAuthor() {
         return _author;
+    }
+
+    public void setName(String name) {
+        _name = name;
+    }
+
+    public void setDescription(String[] description) {
+        _description = description;
+    }
+
+    public void setAuthor(String author) {
+        _author = author;
     }
 
     public Chunk[] grabAllChunks() {
@@ -117,19 +135,41 @@ public class MapInstance {
 
         TurtleInputStream inStream = new TurtleInputStream(new ByteArrayInputStream(in));
 
-        _refId = inStream.readChars(inStream.readShort());
-        _name = inStream.readChars(inStream.readShort());
+        try {
 
-        _description = inStream.readChars(inStream.readShort())
-                                .split("\n");
+            _refId = inStream.readChars(inStream.readShort());
+            _name = inStream.readChars(inStream.readShort());
 
-        _author = inStream.readChars(inStream.readShort());
+            _description = inStream.readChars(inStream.readShort())
+                    .split("\n");
+
+            _author = inStream.readChars(inStream.readShort());
+
+        } catch(EOFException ex) {
+
+            _refId = "id";
+
+            _name = "Converted world";
+            _description = new String[] { "Converted world!" };
+
+            _author = "TurtleGames Converter";
+
+        }
 
     }
 
 
     protected void withWorld(World world) {
         _world = world;
+    }
+
+    public boolean isWithinBounds(int x, int z) {
+
+        return _minX <= x
+                && _minX + _sizeX > x
+                && _minZ <= z
+                && _minZ + _sizeZ > z;
+
     }
 
 }
