@@ -1,4 +1,4 @@
-package co.turtlegames.build.map.command.sub;
+package co.turtlegames.build.map.command.map.sub;
 
 import co.turtlegames.build.map.BuildServerManager;
 import co.turtlegames.build.map.MapInstance;

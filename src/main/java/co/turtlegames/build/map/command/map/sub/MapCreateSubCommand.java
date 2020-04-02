@@ -1,9 +1,8 @@
-package co.turtlegames.build.map.command.sub;
+package co.turtlegames.build.map.command.map.sub;
 
 import co.turtlegames.build.map.BuildServerManager;
 import co.turtlegames.build.map.MapInstance;
-import co.turtlegames.build.map.command.MapCommand;
-import co.turtlegames.core.command.CommandBase;
+import co.turtlegames.build.map.command.map.MapCommand;
 import co.turtlegames.core.command.sub.SubCommandBase;
 import co.turtlegames.core.common.Chat;
 import co.turtlegames.core.file.minio.FileClusterManager;

@@ -1,4 +1,4 @@
-package co.turtlegames.build.map.command.sub;
+package co.turtlegames.build.map.command.map.sub;
 
 import co.turtlegames.build.map.BuildServerManager;
 import co.turtlegames.core.command.CommandBase;
@@ -10,16 +10,12 @@ import co.turtlegames.core.profile.Rank;
 import co.turtlegames.core.world.tworld.TurtleWorldFormat;
 import co.turtlegames.core.world.tworld.io.TurtleOutputStream;
 import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
 import org.bukkit.World;
-import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class MapSnapshotSubCommand extends SubCommandBase<BuildServerManager> {
 
@@ -33,9 +29,9 @@ public class MapSnapshotSubCommand extends SubCommandBase<BuildServerManager> {
         BuildServerManager buildManager = this.getModule();
         Player ply = profile.getOwner();
 
-        if(args.length < 6) {
+        if(args.length < 2) {
 
-            ply.sendMessage(Chat.main("Error", "Invalid arguments! Refer to: " + Chat.elem("/map loadregion <world name> <ref id>")));
+            ply.sendMessage(Chat.main("Error", "Invalid arguments! Refer to: " + Chat.elem("/map snapshot <world name> <ref id>")));
             return;
 
         }

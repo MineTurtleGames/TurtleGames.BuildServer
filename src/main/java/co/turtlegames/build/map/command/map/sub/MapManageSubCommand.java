@@ -1,19 +1,20 @@
-package co.turtlegames.build.map.command.sub;
+package co.turtlegames.build.map.command.map.sub;
 
 import co.turtlegames.build.map.BuildServerManager;
 import co.turtlegames.build.map.MapInstance;
+import co.turtlegames.build.map.menu.MapManageMenu;
 import co.turtlegames.core.command.CommandBase;
 import co.turtlegames.core.command.sub.SubCommandBase;
 import co.turtlegames.core.common.Chat;
 import co.turtlegames.core.profile.PlayerProfile;
 import co.turtlegames.core.profile.Rank;
-import co.turtlegames.core.world.virtual.VirtualWorldManager;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
-public class MapCloseSubCommand extends SubCommandBase<BuildServerManager> {
+public class MapManageSubCommand extends SubCommandBase<BuildServerManager> {
 
-    public MapCloseSubCommand(CommandBase<BuildServerManager> command) {
-        super(command, Rank.BUILDER, "close");
+    public MapManageSubCommand(CommandBase<BuildServerManager> command) {
+        super(command, Rank.BUILDER, "manage", "man");
     }
 
     @Override
@@ -31,8 +32,10 @@ public class MapCloseSubCommand extends SubCommandBase<BuildServerManager> {
 
         }
 
-        buildManager.closeMap(mapInstance);
-        ply.sendMessage(Chat.main("Build Server", "Closed map session for " + Chat.elem(mapInstance.getId())));
+        ply.playSound(ply.getLocation(), Sound.CLICK, 1, 1);
+
+        MapManageMenu menu = new MapManageMenu(this.getModule(), mapInstance, ply);
+        menu.open();
 
     }
 

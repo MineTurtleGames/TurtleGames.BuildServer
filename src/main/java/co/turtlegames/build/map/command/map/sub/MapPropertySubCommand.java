@@ -1,4 +1,4 @@
-package co.turtlegames.build.map.command.sub;
+package co.turtlegames.build.map.command.map.sub;
 
 import co.turtlegames.build.map.BuildServerManager;
 import co.turtlegames.build.map.MapInstance;
@@ -43,6 +43,9 @@ public class MapPropertySubCommand extends SubCommandBase<BuildServerManager> {
         String value = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
 
         switch (property) {
+            case "REFID": case "ID":
+                mapInstance.setRefId(value);
+                break;
             case "NAME": case "MAP_NAME":
                 mapInstance.setName(value);
                 break;

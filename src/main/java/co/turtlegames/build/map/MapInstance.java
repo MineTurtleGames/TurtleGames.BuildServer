@@ -1,10 +1,15 @@
 package co.turtlegames.build.map;
 
+import co.turtlegames.build.util.UtilParticleRender;
 import co.turtlegames.core.world.tworld.TurtleWorldFormat;
+import co.turtlegames.core.world.tworld.TurtleWorldMetaPoint;
 import co.turtlegames.core.world.tworld.io.TurtleInputStream;
 import co.turtlegames.core.world.tworld.io.TurtleOutputStream;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import org.bukkit.Chunk;
 import org.bukkit.World;
+import org.bukkit.util.Vector;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -29,10 +34,16 @@ public class MapInstance {
     private int _sizeX = 4;
     private int _sizeZ = 4;
 
+    private Multimap<Byte, TurtleWorldMetaPoint> _metaPoints;
+
     public MapInstance(String refId, World world) {
 
         _refId = refId;
         _world = world;
+
+        _metaPoints = MultimapBuilder.hashKeys()
+                            .arrayListValues()
+                                .build();
 
     }
 
@@ -44,7 +55,10 @@ public class MapInstance {
         _sizeX = worldFormat.getXWidth();
         _sizeZ = worldFormat.getZWidth();
 
-        this.parseMetadata(worldFormat.getMetadata());
+        _metaPoints = worldFormat.getMetaPoints();
+
+        String defaultId = "default_id";
+        this.parseMetadata(worldFormat.getMetadata(), defaultId);
 
     }
 
@@ -131,7 +145,7 @@ public class MapInstance {
 
     }
 
-    private void parseMetadata(byte[] in) throws IOException {
+    private void parseMetadata(byte[] in, String refIdDefault) throws IOException {
 
         TurtleInputStream inStream = new TurtleInputStream(new ByteArrayInputStream(in));
 
@@ -147,7 +161,7 @@ public class MapInstance {
 
         } catch(EOFException ex) {
 
-            _refId = "id";
+            _refId = refIdDefault;
 
             _name = "Converted world";
             _description = new String[] { "Converted world!" };
@@ -158,6 +172,29 @@ public class MapInstance {
 
     }
 
+    public void doTick() {
+
+        for(TurtleWorldMetaPoint point : _metaPoints.values()) {
+
+            Vector primary = point.getPrimaryPosition();
+            Vector secondary = point.getSecondaryPosition();
+
+            if(secondary != null) {
+
+                Vector min = UtilParticleRender.minVector(primary, secondary)
+                                .add(new Vector(0.15, 0.15, 0.15));
+                Vector max = UtilParticleRender.maxVector(primary, secondary)
+                                .add(new Vector(0.85, 0.85, 0.85));
+
+                UtilParticleRender.drawBox(_world, min, max);
+
+            } else {
+                UtilParticleRender.drawPoint(_world, primary.add(new Vector(0.5, 0.5, 0.5)));
+            }
+
+        }
+
+    }
 
     protected void withWorld(World world) {
         _world = world;
@@ -170,6 +207,18 @@ public class MapInstance {
                 && _minZ <= z
                 && _minZ + _sizeZ > z;
 
+    }
+
+    public void addMetaPoint(TurtleWorldMetaPoint metaPoint) {
+        _metaPoints.put(metaPoint.getMetaType(), metaPoint);
+    }
+
+    public Multimap<Byte, TurtleWorldMetaPoint> getPoints() {
+        return _metaPoints;
+    }
+
+    public void setRefId(String value) {
+        _refId = value;
     }
 
 }

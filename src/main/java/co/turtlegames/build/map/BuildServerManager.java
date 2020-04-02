@@ -1,6 +1,7 @@
 package co.turtlegames.build.map;
 
-import co.turtlegames.build.map.command.MapCommand;
+import co.turtlegames.build.map.command.map.MapCommand;
+import co.turtlegames.build.map.command.mig.MigrationToolCommand;
 import co.turtlegames.build.map.listener.BuildMapListener;
 import co.turtlegames.build.map.listener.BuildServerJoinListener;
 import co.turtlegames.core.TurtleModule;
@@ -33,9 +34,12 @@ public class BuildServerManager extends TurtleModule {
         this.registerListener(new BuildMapListener(this));
 
         this.registerCommand(new MapCommand(this));
+        this.registerCommand(new MigrationToolCommand(this));
 
         FileClusterManager fileClusterManager = this.getModule(FileClusterManager.class);
         fileClusterManager.validateBucket("staging");
+
+        Bukkit.getScheduler().runTaskTimer(this.getPlugin(), this::doTick, 1, 1);
 
     }
 
@@ -110,6 +114,13 @@ public class BuildServerManager extends TurtleModule {
 
     public MapInstance getMapInstance(World world) {
         return _mapInstances.get(world);
+    }
+
+    public void doTick() {
+
+        for(MapInstance inst : _mapInstances.values())
+            inst.doTick();
+
     }
 
 }

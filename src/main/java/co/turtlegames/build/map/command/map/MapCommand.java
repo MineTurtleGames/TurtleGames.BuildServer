@@ -1,7 +1,7 @@
-package co.turtlegames.build.map.command;
+package co.turtlegames.build.map.command.map;
 
 import co.turtlegames.build.map.BuildServerManager;
-import co.turtlegames.build.map.command.sub.*;
+import co.turtlegames.build.map.command.map.sub.*;
 import co.turtlegames.core.command.CommandBase;
 import co.turtlegames.core.common.Chat;
 import co.turtlegames.core.profile.PlayerProfile;
@@ -21,7 +21,7 @@ public class MapCommand extends CommandBase<BuildServerManager> {
         this.addSubCommand(new MapSaveSubCommand(this));
         this.addSubCommand(new MapPropertySubCommand(this));
         this.addSubCommand(new MapCloseSubCommand(this));
-
+        this.addSubCommand(new MapPointSubCommand(this));
         this.addSubCommand(new MapSnapshotSubCommand(this));
 
     }

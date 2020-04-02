@@ -1,4 +1,4 @@
-package co.turtlegames.build.map.command.sub;
+package co.turtlegames.build.map.command.map.sub;
 
 import co.turtlegames.build.map.BuildServerManager;
 import co.turtlegames.build.map.MapInstance;
@@ -49,6 +49,7 @@ public class MapSaveSubCommand extends SubCommandBase<BuildServerManager> {
 
             TurtleWorldFormat tWorld = TurtleWorldFormat.loadFromChunks(chunks);
             tWorld.setMetadata(mapInstance.compileMetadata());
+            tWorld.setMetaPoints(mapInstance.getPoints());
 
             byteArrayOutputStream = new ByteArrayOutputStream();
             TurtleOutputStream turtleOutStream = new TurtleOutputStream(byteArrayOutputStream);
